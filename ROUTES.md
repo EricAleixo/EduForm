@@ -27,8 +27,8 @@
 ### Gerenciamento de Estudantes
 - `GET /student` - Listar todos os estudantes
 - `GET /student/:id` - Obter estudante específico
-- `PATCH /student/:id` - Atualizar dados do estudante
-- `PATCH /student/:id/document` - Atualizar documento do estudante
+- `PATCH /student/:id` - Atualizar dados do estudante (incluindo documento)
+- `PATCH /student/:id/approve` - Aprovar estudante (envia email de aprovação)
 - `DELETE /student/:id` - Deletar estudante
 
 ### Monitoramento de Filas (Sistema de Background Jobs)
@@ -79,11 +79,61 @@ Content-Type: multipart/form-data
 }
 ```
 
-**Nota**: Após o envio do formulário, o sistema:
-- **Processa upload da imagem** de forma síncrona (para verificação)
-- **Salva o estudante** no banco com URL da imagem
-- **Responde imediatamente** (sem aguardar emails)
-- **Envia emails em background** automaticamente
+### 4.1. Atualizar Estudante (Admin)
+```bash
+# Atualizar apenas dados (sem arquivo)
+PATCH /student/1
+Authorization: Bearer <seu-token-jwt>
+Content-Type: application/json
+{
+  "nome": "João Silva Atualizado",
+  "telefone": "(11) 88888-8888",
+  "turma": "B"
+}
+
+# Atualizar dados e documento
+PATCH /student/1
+Authorization: Bearer <seu-token-jwt>
+Content-Type: multipart/form-data
+{
+  "nome": "João Silva Atualizado",
+  "telefone": "(11) 88888-8888",
+  "documentoIdentidade": <novo-arquivo>
+}
+```
+
+### 4.2. Aprovar Estudante (Admin)
+```bash
+PATCH /student/1/approve
+Authorization: Bearer <seu-token-jwt>
+```
+
+**Resposta esperada:**
+```json
+{
+  "id": 1,
+  "nome": "João Silva",
+  "email": "joao@email.com",
+  "telefone": "(11) 99999-9999",
+  "dataNascimento": "2000-01-01",
+  "turma": "A",
+  "serie": "1º ano",
+  "turno": "Manhã",
+  "responsavel": "Maria Silva",
+  "pizzaPreferida": "Margherita",
+  "documentosUrl": "https://res.cloudinary.com/.../image.jpg",
+  "endereco": "Rua das Flores, 123",
+  "observacoes": "Estudante dedicado",
+  "approved": true,
+  "createdAt": "2024-01-15T14:30:00.000Z",
+  "updatedAt": "2024-01-15T15:00:00.000Z"
+}
+```
+
+**Nota**: Após a aprovação, o sistema:
+- **Atualiza o status** para `approved: true`
+- **Envia email de aprovação** em background para o estudante
+- **Atualiza o timestamp** `updatedAt`
 
 ### 5. Monitorar Filas (Admin)
 ```bash
@@ -143,4 +193,10 @@ Para usar Gmail, você precisa:
 - **Upload de imagem é processado de forma síncrona** para verificação adequada
 - **Emails são processados em background** - a API responde imediatamente após o upload
 - Se o processamento de email falhar, a inscrição ainda é salva (não falha o processo)
-- O sistema usa Redis para gerenciar as filas de background jobs 
+- O sistema usa Redis para gerenciar as filas de background jobs
+- **Rota PATCH unificada**: A rota `PATCH /student/:id` pode atualizar dados e/ou documento
+- Se um documento for enviado na atualização, ele substituirá o anterior
+- Se nenhum documento for enviado, o documento atual será mantido
+- **Timestamps automáticos**: `createdAt` e `updatedAt` são gerenciados automaticamente pelo TypeORM
+- **Sistema de aprovação**: Estudantes são criados com `approved: false` e podem ser aprovados via API
+- **Email de aprovação**: Enviado automaticamente em background quando um estudante é aprovado

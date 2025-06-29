@@ -98,4 +98,60 @@ export class EmailService {
       return false;
     }
   }
+
+  async sendApprovalEmail(
+    to: string,
+    studentName: string,
+    registrationId: number
+  ) {
+    try {
+      await this.mailerService.sendMail({
+        to,
+        subject: 'Inscrição Aprovada - Parabéns!',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #d4edda; padding: 20px; border-radius: 8px; text-align: center;">
+              <h1 style="color: #155724; margin-bottom: 20px;">🎉 Inscrição Aprovada!</h1>
+              
+              <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h2 style="color: #333; margin-bottom: 15px;">Parabéns, ${studentName}!</h2>
+                
+                <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
+                  Sua inscrição foi <strong>aprovada</strong> com sucesso! 
+                  Estamos muito felizes em tê-lo(a) conosco!
+                </p>
+                
+                <div style="background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                  <strong>Número de Inscrição:</strong> #${registrationId}
+                </div>
+                
+                <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
+                  Nossa equipe entrará em contato em breve com mais informações sobre o início das atividades.
+                </p>
+                
+                <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                  <strong>📋 Próximos Passos:</strong><br>
+                  • Aguarde contato da nossa equipe<br>
+                  • Prepare-se para o início das atividades<br>
+                  • Mantenha seus dados atualizados
+                </div>
+                
+                <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+                  <p style="color: #999; font-size: 14px; margin: 0;">
+                    Este é um email automático, por favor não responda.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `,
+      });
+      
+      console.log(`Email de aprovação enviado para: ${to}`);
+      return true;
+    } catch (error) {
+      console.error('Erro ao enviar email de aprovação:', error);
+      return false;
+    }
+  }
 } 

@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class Student {
@@ -43,4 +43,12 @@ export class Student {
     @Column({nullable: true})
     observacoes?: String;
 
+    @Column({default: false})
+    approved: boolean;
+
+    @CreateDateColumn()
+    createdAt: string;
+
+    @UpdateDateColumn()
+    updatedAt: string;
 }

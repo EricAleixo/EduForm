@@ -39,4 +39,13 @@ export class QueueService {
       registrationId,
     });
   }
+
+  async addApprovalEmail(to: string, studentName: string, registrationId: number) {
+    await this.addEmailJob({
+      type: 'approval',
+      to,
+      studentName,
+      registrationId,
+    });
+  }
 } 

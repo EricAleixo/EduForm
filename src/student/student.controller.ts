@@ -22,8 +22,8 @@ export class StudentController {
         return cb(null, true); // Arquivo é opcional
       }
       
-      if (!file.mimetype.match(/^image\/(jpeg|png|jpg|gif)$/)) {
-        return cb(new BadRequestException("Somente imagens (JPEG, PNG, JPG, GIF) são permitidas"), false);
+      if (!file.mimetype.match(/^image\/(jpeg|png|jpg|pdf)$/)) {
+        return cb(new BadRequestException("Somente imagens (JPEG, PNG, JPG, PDF) são permitidas"), false);
       }
       
       cb(null, true);
@@ -61,19 +61,29 @@ export class StudentController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto) {
-    return this.studentService.update(+id, updateStudentDto);
-  }
-
-  @Patch(":id/document")
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
-  @UseInterceptors(FileInterceptor("file"))
-  async updateDocument(
-    @Param("id") id:number,
-    @UploadedFile() file: Express.Multer.File
+  @UseInterceptors(FileInterceptor("documentoIdentidade", {
+    limits: { 
+      fileSize: 5 * 1024 * 1024, // 5MB
+      fieldSize: 5 * 1024 * 1024 
+    },
+    fileFilter: (req, file, cb) => {
+      if (!file) {
+        return cb(null, true); // Arquivo é opcional
+      }
+      
+      if (!file.mimetype.match(/^image\/(jpeg|png|jpg|pdf)$/)) {
+        return cb(new BadRequestException("Somente imagens (JPEG, PNG, JPG, PDF) são permitidas"), false);
+      }
+      
+      cb(null, true);
+    } 
+  }))
+  async update(
+    @Param('id') id: string, 
+    @Body() updateStudentDto: UpdateStudentDto,
+    @UploadedFile() file?: Express.Multer.File
   ) {
-    return this.studentService.updateImage(id, file);
+    return this.studentService.update(+id, updateStudentDto, file);
   }
 
   @Delete(':id')
@@ -81,5 +91,12 @@ export class StudentController {
   @Roles('admin')
   remove(@Param('id') id: string) {
     return this.studentService.remove(+id);
+  }
+
+  @Patch(':id/approve')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async approveStudent(@Param('id') id: string) {
+    return this.studentService.approveStudent(+id);
   }
 }

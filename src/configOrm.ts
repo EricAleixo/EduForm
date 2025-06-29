@@ -6,4 +6,6 @@ export const configOrm = (configService: ConfigService): TypeOrmModuleOptions =>
     url: configService.get<string>('DATABASE_URL'),
     synchronize: true,
     autoLoadEntities: true,
+    entities: [],
+    logging: false,
 });

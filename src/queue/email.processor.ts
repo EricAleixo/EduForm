@@ -3,7 +3,7 @@ import { Job } from 'bull';
 import { EmailService } from '../email/email.service';
 
 export interface EmailJobData {
-  type: 'confirmation' | 'admin-notification';
+  type: 'confirmation' | 'admin-notification' | 'approval';
   to: string;
   studentName: string;
   studentEmail?: string;
@@ -33,6 +33,13 @@ export class EmailProcessor {
           registrationId
         );
         console.log(`✅ Notificação enviada para admin: ${to}`);
+      } else if (type === 'approval') {
+        await this.emailService.sendApprovalEmail(
+          to,
+          studentName,
+          registrationId
+        );
+        console.log(`✅ Email de aprovação enviado para: ${to}`);
       }
     } catch (error) {
       console.error(`❌ Erro ao processar email ${type}:`, error);
