@@ -4,9 +4,11 @@ import { StudentController } from './student.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Student } from './entities/student.entity';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
+import { EmailModule } from 'src/email/email.module';
+import { QueueModule } from 'src/queue/queue.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Student]), CloudinaryModule],
+  imports: [TypeOrmModule.forFeature([Student]), CloudinaryModule, EmailModule, QueueModule],
   controllers: [StudentController],
   providers: [StudentService],
 })

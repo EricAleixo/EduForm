@@ -4,6 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { configOrm } from './configOrm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
   imports: [
@@ -14,7 +17,8 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
       inject: [ConfigService]
     }), 
     StudentModule, 
-    CloudinaryModule
+    CloudinaryModule, UsersModule, AuthModule,
+    QueueModule
   ],
   controllers: [],
   providers: [],
