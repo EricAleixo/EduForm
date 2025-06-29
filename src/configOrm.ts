@@ -1,8 +1,9 @@
-import {DataSourceOptions} from "typeorm"
+import { ConfigService } from '@nestjs/config';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
-export const configOrm: DataSourceOptions = {
-    type: "postgres",
-    url: process.env.DATABASE_URL,
-    entities: [__dirname + "/**/*.entity{.ts,.js}"],
-    synchronize: true
-}
+export const configOrm = (configService: ConfigService): TypeOrmModuleOptions => ({
+    type: 'postgres',
+    url: configService.get<string>('DATABASE_URL'),
+    synchronize: true,
+    autoLoadEntities: true,
+});

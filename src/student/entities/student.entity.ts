@@ -6,37 +6,41 @@ export class Student {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({nullable:false})
     nome: string;
 
-    @Column({unique: true})
+    @Column({unique: true, nullable:false})
     email: string;
 
-    @Column()
+    
+    @Column({nullable:false})
     telefone: string;
-
-    @Column()
+    
+    @Column({nullable:false})
     dataNascimento: string;
-
-    @Column()
+    
+    @Column({nullable:false})
     turma: string;
-
-    @Column()
+    
+    @Column({nullable:false})
     serie: string;
-
-    @Column()
+    
+    @Column({nullable:false})
     turno: string;
-
-    @Column()
+    
+    @Column({nullable:false})
     responsavel: string;
-
-    @Column()
+    
+    @Column({nullable:false})
     pizzaPreferida: string;
+    
+    @Column({nullable: true})
+    documentosUrl?: string;
 
-    @Column()
+    @Column({nullable: true})
     endereco?: string;
-
-    @Column()
+    
+    @Column({nullable: true})
     observacoes?: String;
 
 }
