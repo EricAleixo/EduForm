@@ -199,4 +199,13 @@ Para usar Gmail, você precisa:
 - Se nenhum documento for enviado, o documento atual será mantido
 - **Timestamps automáticos**: `createdAt` e `updatedAt` são gerenciados automaticamente pelo TypeORM
 - **Sistema de aprovação**: Estudantes são criados com `approved: false` e podem ser aprovados via API
+- **Aprovação por email (admin)**: Quando um estudante é cadastrado, o admin recebe um email com um link seguro para aprovar o estudante. Esse link contém um token JWT de curta duração (1h) e leva para a rota:
+
+  ```
+  GET /student/approve/:id?token=SEU_TOKEN
+  ```
+  - O admin pode clicar no link do email para aprovar o estudante diretamente, sem precisar acessar o painel.
+  - O token é validado pelo backend antes da aprovação.
+  - Após a aprovação, o estudante recebe um email de confirmação.
+
 - **Email de aprovação**: Enviado automaticamente em background quando um estudante é aprovado

@@ -6,9 +6,10 @@ import { Student } from './entities/student.entity';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { EmailModule } from 'src/email/email.module';
 import { QueueModule } from 'src/queue/queue.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Student]), CloudinaryModule, EmailModule, QueueModule],
+  imports: [TypeOrmModule.forFeature([Student]), CloudinaryModule, EmailModule, QueueModule, AuthModule],
   controllers: [StudentController],
   providers: [StudentService],
 })
