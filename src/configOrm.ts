@@ -8,4 +8,6 @@ export const configOrm = (configService: ConfigService): TypeOrmModuleOptions =>
     autoLoadEntities: true,
     entities: [],
     logging: false,
+    ssl: process.env.NODE_ENV === 'production' ? true : false,
+    extra: process.env.NODE_ENV === 'production' ? { ssl: { rejectUnauthorized: false } } : {},
 });
