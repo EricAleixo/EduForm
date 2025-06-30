@@ -2,11 +2,25 @@ import { Module } from '@nestjs/common';
 import { StudentModule } from './student/student.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { configOrm } from './configOrm';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
-  imports: [StudentModule, TypeOrmModule.forRoot(configOrm), ConfigModule.forRoot({isGlobal: true})],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }), 
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => configOrm(configService),
+      inject: [ConfigService]
+    }), 
+    StudentModule, 
+    CloudinaryModule, UsersModule, AuthModule,
+    QueueModule
+  ],
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }
