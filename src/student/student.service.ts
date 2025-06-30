@@ -6,6 +6,7 @@ import { Student } from './entities/student.entity';
 import { Repository } from 'typeorm';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { QueueService } from 'src/queue/queue.service';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class StudentService {
@@ -14,7 +15,8 @@ export class StudentService {
     @InjectRepository(Student)
     private readonly studentRepository: Repository<Student>,
     private readonly cloudinaryService: CloudinaryService,
-    private readonly queueService: QueueService
+    private readonly queueService: QueueService,
+    private readonly authService: AuthService
   ) {}
 
   async create(createStudentDto: CreateStudentDto, file?: Express.Multer.File): Promise<Student> {
@@ -55,6 +57,9 @@ export class StudentService {
         savedStudent.email,
         savedStudent.id
       );
+
+      // Enviar email de aprovação para o admin
+      await this.sendApprovalRequestToAdmin(savedStudent);
 
       console.log('📧 Emails adicionados na fila para processamento em background');
     } catch (error) {
@@ -129,5 +134,17 @@ export class StudentService {
     }
 
     return updatedStudent;
+  }
+
+  async sendApprovalRequestToAdmin(student: Student) {
+    // Gerar token JWT curto (ex: 1h de expiração)
+    const payload = { studentId: student.id };
+    const approvalToken = this.authService['jwtService'].sign(payload, { expiresIn: '1h' });
+    await this.queueService.addAdminApprovalRequestEmail(
+      student.nome,
+      student.email,
+      student.id,
+      approvalToken
+    );
   }
 }

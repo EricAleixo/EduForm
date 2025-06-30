@@ -1,9 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class EmailService {
-  constructor(private mailerService: MailerService) {}
+  constructor(
+    private mailerService: MailerService,
+    private configService: ConfigService
+  ) {}
+
+  private getAppUrl(): string {
+    return this.configService.get<string>('APP_URL', 'http://localhost:4200');
+  }
 
   async sendRegistrationConfirmation(
     to: string,
@@ -37,6 +45,7 @@ export class EmailService {
                 </p>
                 
                 <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+                  <a href="${this.getAppUrl()}" style="display: inline-block; margin-bottom: 10px; padding: 10px 20px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">Ir para a Home</a>
                   <p style="color: #999; font-size: 14px; margin: 0;">
                     Este é um email automático, por favor não responda.
                   </p>
@@ -137,6 +146,7 @@ export class EmailService {
                 </div>
                 
                 <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+                  <a href="${this.getAppUrl()}" style="display: inline-block; margin-bottom: 10px; padding: 10px 20px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">Ir para a Home</a>
                   <p style="color: #999; font-size: 14px; margin: 0;">
                     Este é um email automático, por favor não responda.
                   </p>
@@ -151,6 +161,50 @@ export class EmailService {
       return true;
     } catch (error) {
       console.error('Erro ao enviar email de aprovação:', error);
+      return false;
+    }
+  }
+
+  async sendAdminApprovalRequest(
+    studentName: string,
+    studentEmail: string,
+    registrationId: number,
+    approvalToken: string
+  ) {
+    try {
+      const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
+      const approvalLink = `${this.getAppUrl()}/admin/approve/${registrationId}?token=${approvalToken}`;
+      await this.mailerService.sendMail({
+        to: adminEmail,
+        subject: 'Aprovar Inscrição de Estudante',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
+              <h1 style="color: #ffc107; margin-bottom: 20px;">🔔 Aprovação de Inscrição</h1>
+              <div style="background-color: white; padding: 20px; border-radius: 8px;">
+                <h2 style="color: #333; margin-bottom: 15px;">Detalhes do Estudante:</h2>
+                <div style="margin-bottom: 15px;">
+                  <strong>Nome:</strong> ${studentName}<br>
+                  <strong>Email:</strong> ${studentEmail}<br>
+                  <strong>ID da Inscrição:</strong> #${registrationId}<br>
+                </div>
+                <p style="color: #666; line-height: 1.6;">Clique no botão abaixo para aprovar este estudante:</p>
+                <a href="${approvalLink}" style="display: inline-block; margin: 20px 0; padding: 12px 24px; background-color: #28a745; color: white; border-radius: 5px; text-decoration: none; font-size: 16px;">Aprovar Estudante</a>
+                <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+                  <a href="${this.getAppUrl()}" style="display: inline-block; margin-bottom: 10px; padding: 10px 20px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">Ir para a Home</a>
+                  <p style="color: #999; font-size: 14px; margin: 0;">
+                    Este é um email automático, por favor não responda.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `,
+      });
+      console.log(`Solicitação de aprovação enviada para admin: ${adminEmail}`);
+      return true;
+    } catch (error) {
+      console.error('Erro ao enviar solicitação de aprovação para admin:', error);
       return false;
     }
   }

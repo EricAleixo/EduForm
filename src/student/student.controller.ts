@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, UseGuards, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, UseGuards, BadRequestException, Res, Query } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
@@ -6,10 +6,12 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+import { Response } from 'express';
+import { AuthService } from '../auth/auth.service';
 
 @Controller('student')
 export class StudentController {
-  constructor(private readonly studentService: StudentService) { }
+  constructor(private readonly studentService: StudentService, private readonly authService: AuthService) { }
 
   @Post()
   @UseInterceptors(FileInterceptor("documentoIdentidade", {
@@ -98,5 +100,23 @@ export class StudentController {
   @Roles('admin')
   async approveStudent(@Param('id') id: string) {
     return this.studentService.approveStudent(+id);
+  }
+
+  @Get('approve/:id')
+  async approveByEmail(
+    @Param('id') id: string,
+    @Query('token') token: string,
+    @Res() res: Response
+  ) {
+    try {
+      // Validar token (deve ser igual ao gerado no StudentService)
+      // O método validateToken do AuthService retorna o payload se válido
+      await this.authService.validateToken(token);
+      await this.studentService.approveStudent(+id);
+      // Redirecionar para a home do frontend
+      return res.redirect(process.env.APP_URL || 'http://localhost:3001');
+    } catch (error) {
+      return res.status(400).send('Link de aprovação inválido ou expirado.');
+    }
   }
 }
