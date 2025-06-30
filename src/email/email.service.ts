@@ -78,7 +78,7 @@ export class EmailService {
                   <strong>Nome:</strong> ${studentName}<br>
                   <strong>Email:</strong> ${studentEmail}<br>
                   <strong>ID da Inscrição:</strong> #${registrationId}<br>
-                  <strong>Data:</strong> ${new Date().toLocaleString('pt-BR')}
+                  <strong>Data:</strong> ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
                 </div>
                 
                 <p style="color: #666; line-height: 1.6;">
